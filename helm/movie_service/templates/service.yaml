@@ -5,9 +5,11 @@ metadata:
     lb-service: movie-service
   name: movie-service
 spec:
+  type: {{ .Values.service.type }}
   ports:
     - name: movie-service-port
       port: {{ .Values.service.hostPort }}
       targetPort: {{ .Values.service.targetPort }}
+      nodePort: {{ .Values.service.nodePort }}
   selector:
     lb-service: movie-service

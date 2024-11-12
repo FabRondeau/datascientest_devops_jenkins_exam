@@ -5,7 +5,7 @@ metadata:
     lb-service: movie-db
   name: movie-db
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       lb-service: movie-db
