@@ -20,7 +20,6 @@ stages {
             steps {
                 script {
                 sh '''
-                 docker rm -f jenkins
                  echo $DOCKER_IMAGE_1:$DOCKER_TAG
                  docker build $DOCKER_IMAGE_1:$DOCKER_TAG
                 sleep 6
