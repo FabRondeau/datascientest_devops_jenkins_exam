@@ -16,12 +16,14 @@ DOCKER_PASS = credentials("DOCKER_HUB_PASS") // we retrieve  docker password fro
 }
 agent any // Jenkins will be able to select all available agents
 stages {
-        stage('Docker Build/Push image 1'){ // docker build image stage
+        stage('Docker Push image 1'){ // docker build image stage
             steps {
                 script {
                 sh '''
                  docker rm -f jenkins
-                 docker build -t $DOCKER_IMAGE_1:$DOCKER_TAG .
+                 echo $DOCKER_IMAGE_1:$DOCKER_TAG
+                 docker build -t $DOCKER_IMAGE_1:1.0 .
+                 docker tag $DOCKER_IMAGE_1:$DOCKER_TAG
                 sleep 6
                 '''
                 }
