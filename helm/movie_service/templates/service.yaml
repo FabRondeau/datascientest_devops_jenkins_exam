@@ -1,15 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "movie_service.fullname" . }}
   labels:
-    {{- include "movie_service.labels" . | nindent 4 }}
+    lb-service: movie-service
+  name: movie-service
 spec:
-  type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+    - name: movie-service-port
+      port: {{ .Values.service.hostPort }}
+      targetPort: {{ .Values.service.targetPort }}
   selector:
-    {{- include "movie_service.selectorLabels" . | nindent 4 }}
+    lb-service: movie-service
