@@ -9,28 +9,25 @@ spec:
   selector:
     matchLabels:
       lb-service: movie-db
-  strategy:
-    type: Recreate
+  serviceName: movie-db
   template:
     metadata:
       labels:
         lb-service: movie-db
     spec:
       containers:
-        - env:
-            - name: POSTGRES_DB
-              value: movie_db_dev
-            - name: POSTGRES_PASSWORD
-              value: movie_db_password
-            - name: POSTGRES_USER
-              value: movie_db_username
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        - image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           name: movie-db
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: movie-db-configmap
+          - secretRef:
+              name: movie-db-secret
           {{- with .Values.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      restartPolicy: Always
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
