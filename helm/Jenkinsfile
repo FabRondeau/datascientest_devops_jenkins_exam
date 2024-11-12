@@ -1,0 +1,250 @@
+pipeline {
+environment { // Declaration of environment variables
+DOCKER_ID = "informaiddock" // replace this with your docker-id
+DOCKER_IMAGE_1 = "informaiddock/dst-postgres-12-1"
+DOCKER_IMAGE_2 = "informaiddock/dst-movie-service"
+DOCKER_IMAGE_3 = "informaiddock/dst-postgres-12-1"
+DOCKER_IMAGE_4 = "informaiddock/dst-cast-service"
+DOCKER_IMAGE_5 = "nginx"
+MOVIE_DB_VALUES = "movie_db/values.yaml"
+MOVIE_SERVICE_VALUES = "movie_service/values.yaml"
+CAST_DB_VALUES = "cast_db/values.yaml"
+CAST_SERVICE_VALUES = "cast_service/values.yaml"
+NGINX_VALUES = "nginx/values.yaml"
+DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
+}
+agent any // Jenkins will be able to select all available agents
+stages {
+        environment {
+          DOCKER_PASS = credentials("DOCKER_HUB_PASS") // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
+        }
+        stage('Docker Build/Push image 1'){ // docker build image stage
+            steps {
+                script {
+                sh '''
+                 docker rm -f jenkins
+                 docker build -t $DOCKER_IMAGE_1:$DOCKER_TAG .
+                sleep 6
+                '''
+                }
+
+                script {
+                sh '''
+                docker login -u $DOCKER_ID -p $DOCKER_PASS
+                docker push $DOCKER_IMAGE_1:$DOCKER_TAG
+                '''
+                }
+            }
+        }
+
+        stage('Docker Build/Push image 2'){ // docker build image stage
+            steps {
+                script {
+                sh '''
+                 docker rm -f jenkins
+                 docker build -t $DOCKER_IMAGE_2:$DOCKER_TAG .
+                sleep 6
+                '''
+                }
+
+                script {
+                sh '''
+                docker login -u $DOCKER_ID -p $DOCKER_PASS
+                docker push $DOCKER_IMAGE_2:$DOCKER_TAG
+                '''
+                }
+            }
+        }
+        stage('Docker Build/Push image 3'){ // docker build image stage
+            steps {
+                script {
+                sh '''
+                 docker rm -f jenkins
+                 docker build -t $DOCKER_IMAGE_3:$DOCKER_TAG .
+                sleep 6
+                '''
+                }
+
+                script {
+                sh '''
+                docker login -u $DOCKER_ID -p $DOCKER_PASS
+                docker push $DOCKER_IMAGE_3:$DOCKER_TAG
+                '''
+                }
+            }
+        }
+        stage('Docker Build/Push image 4'){ // docker build image stage
+            steps {
+                script {
+                sh '''
+                 docker rm -f jenkins
+                 docker build -t $DOCKER_IMAGE_4:$DOCKER_TAG .
+                sleep 6
+                '''
+                }
+
+                script {
+                sh '''
+                docker login -u $DOCKER_ID -p $DOCKER_PASS
+                docker push $DOCKER_IMAGE_4:$DOCKER_TAG
+                '''
+                }
+            }
+        }
+        stage('Docker Build/Push image 5'){ // docker build image stage
+            steps {
+                script {
+                sh '''
+                 docker rm -f jenkins
+                 docker build -t $DOCKER_IMAGE_5:$DOCKER_TAG .
+                sleep 6
+                '''
+                }
+
+                script {
+                sh '''
+                docker login -u $DOCKER_ID -p $DOCKER_PASS
+                docker push $DOCKER_IMAGE_5:$DOCKER_TAG
+                '''
+                }
+            }
+        }
+      stage('Deploiement en DEV'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        NAMESPACE = 'DEV'
+        }
+        steps {
+            script {
+            sh '''
+            rm -Rf .kube
+            mkdir .kube
+            ls
+            cat $KUBECONFIG > .kube/config
+            cat $MOVIE_DB_VALUES
+            cat $MOVIE_SERVICE_VALUES
+            cat $CAST_DB_VALUES
+            cat $CAST_SERVICE_VALUES
+            cat $NGINX_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+            helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+            helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+            helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+            helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+            helm upgrade --install nginx nginx --namespace $NAMESPACE
+            '''
+            }
+        }
+
+        }
+      stage('Deploiement en QA'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        NAMESPACE = 'QA'
+        }
+        steps {
+            script {
+            sh '''
+            rm -Rf .kube
+            mkdir .kube
+            ls
+            cat $KUBECONFIG > .kube/config
+            cat $MOVIE_DB_VALUES
+            cat $MOVIE_SERVICE_VALUES
+            cat $CAST_DB_VALUES
+            cat $CAST_SERVICE_VALUES
+            cat $NGINX_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+            helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+            helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+            helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+            helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+            helm upgrade --install nginx nginx --namespace $NAMESPACE
+            '''
+            }
+        }
+
+        }
+  stage('Deploiement en STAGING'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        NAMESPACE = 'STAGING'
+        }
+        steps {
+            script {
+            sh '''
+            rm -Rf .kube
+            mkdir .kube
+            ls
+            cat $KUBECONFIG > .kube/config
+            cat $MOVIE_DB_VALUES
+            cat $MOVIE_SERVICE_VALUES
+            cat $CAST_DB_VALUES
+            cat $CAST_SERVICE_VALUES
+            cat $NGINX_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+            helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+            helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+            helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+            helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+            helm upgrade --install nginx nginx --namespace $NAMESPACE
+            '''
+            }
+        }
+
+        }
+  stage('Deploiement en PROD'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        NAMESPACE = 'PROD'
+        }
+        steps {
+            // Create an Approval Button with a timeout of 15minutes.
+            // this require a manuel validation in order to deploy on production environment
+            timeout(time: 15, unit: "MINUTES") {
+                input message: 'Do you want to deploy in production ?', ok: 'Yes'
+            }
+
+            script {
+            sh '''
+            rm -Rf .kube
+            mkdir .kube
+            ls
+            cat $KUBECONFIG > .kube/config
+            cat $MOVIE_DB_VALUES
+            cat $MOVIE_SERVICE_VALUES
+            cat $CAST_DB_VALUES
+            cat $CAST_SERVICE_VALUES
+            cat $NGINX_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+            helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+            helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+            helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+            helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+            helm upgrade --install nginx nginx --namespace $NAMESPACE
+            '''
+            }
+        }
+    }
+}
+}
