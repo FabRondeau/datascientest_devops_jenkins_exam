@@ -1,5 +1,7 @@
 pipeline {
-    environment { // Declaration of environment variables
+    environment {
+        // Declaration of environment variables
+        KUBECONFIG = credentials('config')
         MOVIE_DB_VALUES = 'helm/movie_db/values.yaml'
         MOVIE_SERVICE_VALUES = 'helm/movie_service/values.yaml'
         CAST_DB_VALUES = 'helm/cast_db/values.yaml'
@@ -97,7 +99,6 @@ pipeline {
         stage('Deploiement en DEV') {
             environment
             {
-                KUBECONFIG = credentials('config') // we retrieve  kubeconfig from secret file called config saved on jenkins
                 NAMESPACE = 'DEV'
             }
             steps {
@@ -129,8 +130,6 @@ pipeline {
         stage('Deploiement en QA') {
             environment
             {
-                // we retrieve  kubeconfig from secret file called config saved on jenkins
-                KUBECONFIG = credentials('config')
                 NAMESPACE = 'QA'
             }
             steps {
@@ -162,8 +161,6 @@ pipeline {
         stage('Deploiement en STAGING') {
             environment
             {
-                // we retrieve  kubeconfig from secret file called config saved on jenkins
-                KUBECONFIG = credentials('config')
                 NAMESPACE = 'STAGING'
             }
             steps {
@@ -195,8 +192,6 @@ pipeline {
         stage('Deploiement en PROD') {
             environment
             {
-                // we retrieve  kubeconfig from secret file called config saved on jenkins
-                KUBECONFIG = credentials('config')
                 NAMESPACE = 'PROD'
             }
             steps {
