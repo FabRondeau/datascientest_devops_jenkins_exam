@@ -127,6 +127,70 @@ pipeline {
                 }
             }
         }
+        stage('Deploiement en QA') {
+            environment
+            {
+                NAMESPACE = 'QA'
+                KUBECONFIG = credentials('config')
+            }
+            steps {
+                script {
+                    sh '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cat $MOVIE_DB_VALUES
+                    cat $MOVIE_SERVICE_VALUES
+                    cat $CAST_DB_VALUES
+                    cat $CAST_SERVICE_VALUES
+                    cat $NGINX_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+                    helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+                    helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+                    helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+                    helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+                    helm upgrade --install nginx nginx --namespace $NAMESPACE
+                    '''
+                }
+            }
+        }
+        stage('Deploiement en STAGING') {
+            environment
+            {
+                NAMESPACE = 'STAGING'
+                KUBECONFIG = credentials('config')
+            }
+            steps {
+                script {
+                    sh '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cat $MOVIE_DB_VALUES
+                    cat $MOVIE_SERVICE_VALUES
+                    cat $CAST_DB_VALUES
+                    cat $CAST_SERVICE_VALUES
+                    cat $NGINX_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+                    helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+                    helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+                    helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+                    helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+                    helm upgrade --install nginx nginx --namespace $NAMESPACE
+                    '''
+                }
+            }
+        }
         stage('Deploiement en PROD') {
             environment
             {
