@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        // Declaration of environment variables
+        // Declaration of environment variables.
         KUBECONFIG = credentials('config')
         MOVIE_DB_VALUES = 'helm/movie_db/values.yaml'
         MOVIE_SERVICE_VALUES = 'helm/movie_service/values.yaml'
