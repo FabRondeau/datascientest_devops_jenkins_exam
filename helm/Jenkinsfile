@@ -8,9 +8,8 @@ NGINX_VALUES = "nginx/values.yaml"
 DOCKER_ID = "informaiddock" // replace this with your docker-id
 DOCKER_IMAGE_1 = "informaiddock/dst-postgres-12-1"
 DOCKER_IMAGE_2 = "informaiddock/dst-movie-service"
-DOCKER_IMAGE_3 = "informaiddock/dst-postgres-12-1"
-DOCKER_IMAGE_4 = "informaiddock/dst-cast-service"
-DOCKER_IMAGE_5 = "nginx"
+DOCKER_IMAGE_3 = "informaiddock/dst-cast-service"
+DOCKER_IMAGE_4 = "nginx"
 DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
 DOCKER_PASS = credentials("DOCKER_HUB_PASS") // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
 }
@@ -36,12 +35,13 @@ stages {
             }
         }
 
-        stage('Docker Build/Push image 2'){ // docker build image stage
+        stage('Docker Push image 2'){ // docker build image stage
             steps {
                 script {
                 sh '''
-                 docker rm -f jenkins
-                 docker build -t $DOCKER_IMAGE_2:$DOCKER_TAG .
+                 echo $DOCKER_IMAGE_2:$DOCKER_TAG
+                 docker pull $DOCKER_IMAGE_2:1.0
+                 docker tag $DOCKER_IMAGE_2:1.0 $DOCKER_IMAGE_2:$DOCKER_TAG
                 sleep 6
                 '''
                 }
@@ -54,12 +54,13 @@ stages {
                 }
             }
         }
-        stage('Docker Build/Push image 3'){ // docker build image stage
+        stage('Docker Push image 3'){ // docker build image stage
             steps {
                 script {
                 sh '''
-                 docker rm -f jenkins
-                 docker build -t $DOCKER_IMAGE_3:$DOCKER_TAG .
+                 echo $DOCKER_IMAGE_3:$DOCKER_TAG
+                 docker pull $DOCKER_IMAGE_3:1.0
+                 docker tag $DOCKER_IMAGE_3:1.0 $DOCKER_IMAGE_3:$DOCKER_TAG
                 sleep 6
                 '''
                 }
@@ -72,12 +73,13 @@ stages {
                 }
             }
         }
-        stage('Docker Build/Push image 4'){ // docker build image stage
+        stage('Docker Push image 4'){ // docker build image stage
             steps {
                 script {
                 sh '''
-                 docker rm -f jenkins
-                 docker build -t $DOCKER_IMAGE_4:$DOCKER_TAG .
+                 echo $DOCKER_IMAGE_4:$DOCKER_TAG
+                 docker pull $DOCKER_IMAGE_4:1.0
+                 docker tag $DOCKER_IMAGE_4:1.0 $DOCKER_IMAGE_4:$DOCKER_TAG
                 sleep 6
                 '''
                 }
@@ -86,24 +88,6 @@ stages {
                 sh '''
                 docker login -u $DOCKER_ID -p $DOCKER_PASS
                 docker push $DOCKER_IMAGE_4:$DOCKER_TAG
-                '''
-                }
-            }
-        }
-        stage('Docker Build/Push image 5'){ // docker build image stage
-            steps {
-                script {
-                sh '''
-                 docker rm -f jenkins
-                 docker build -t $DOCKER_IMAGE_5:$DOCKER_TAG .
-                sleep 6
-                '''
-                }
-
-                script {
-                sh '''
-                docker login -u $DOCKER_ID -p $DOCKER_PASS
-                docker push $DOCKER_IMAGE_5:$DOCKER_TAG
                 '''
                 }
             }
