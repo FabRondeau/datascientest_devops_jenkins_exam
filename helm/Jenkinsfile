@@ -1,106 +1,108 @@
 pipeline {
-environment { // Declaration of environment variables
-MOVIE_DB_VALUES = "movie_db/values.yaml"
-MOVIE_SERVICE_VALUES = "movie_service/values.yaml"
-CAST_DB_VALUES = "cast_db/values.yaml"
-CAST_SERVICE_VALUES = "cast_service/values.yaml"
-NGINX_VALUES = "nginx/values.yaml"
-DOCKER_ID = "informaiddock" // replace this with your docker-id
-DOCKER_IMAGE_1 = "informaiddock/dst-postgres-12-1"
-DOCKER_IMAGE_2 = "informaiddock/dst-movie-service"
-DOCKER_IMAGE_3 = "informaiddock/dst-cast-service"
-DOCKER_IMAGE_4 = "informaiddock/dst-nginx-latest"
-DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
-DOCKER_PASS = credentials("DOCKER_HUB_PASS") // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
-}
-agent any // Jenkins will be able to select all available agents
-stages {
-    stage('Docker Push image 1'){ // docker build image stage
-        steps {
-            script {
-            sh '''
+    environment { // Declaration of environment variables
+        MOVIE_DB_VALUES = 'helm/movie_db/values.yaml'
+        MOVIE_SERVICE_VALUES = 'helm/movie_service/values.yaml'
+        CAST_DB_VALUES = 'helm/cast_db/values.yaml'
+        CAST_SERVICE_VALUES = 'helm/cast_service/values.yaml'
+        NGINX_VALUES = 'helm/nginx/values.yaml'
+        DOCKER_ID = 'informaiddock' // replace this with your docker-id
+        DOCKER_IMAGE_1 = 'informaiddock/dst-postgres-12-1'
+        DOCKER_IMAGE_2 = 'informaiddock/dst-movie-service'
+        DOCKER_IMAGE_3 = 'informaiddock/dst-cast-service'
+        DOCKER_IMAGE_4 = 'informaiddock/dst-nginx-latest'
+        // we will tag our images with the current build in order to increment the value by 1 with each new build
+        DOCKER_TAG = "v.${BUILD_ID}.0"
+        // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
+        DOCKER_PASS = credentials('DOCKER_HUB_PASS')
+    }
+    agent any // Jenkins will be able to select all available agents
+    stages {
+        stage('Docker Push image 1') { // docker build image stage
+            steps {
+                script {
+                    sh '''
                 echo $DOCKER_IMAGE_1:$DOCKER_TAG
                 docker pull $DOCKER_IMAGE_1:1.0
                 docker tag $DOCKER_IMAGE_1:1.0 $DOCKER_IMAGE_1:$DOCKER_TAG
             sleep 6
             '''
-            }
+                }
 
-            script {
-            sh '''
+                script {
+                    sh '''
             docker login -u $DOCKER_ID -p $DOCKER_PASS
             docker push $DOCKER_IMAGE_1:$DOCKER_TAG
             '''
+                }
             }
         }
-    }
 
-    stage('Docker Push image 2'){ // docker build image stage
-        steps {
-            script {
-            sh '''
+        stage('Docker Push image 2') { // docker build image stage
+            steps {
+                script {
+                    sh '''
                 echo $DOCKER_IMAGE_2:$DOCKER_TAG
                 docker pull $DOCKER_IMAGE_2:1.0
                 docker tag $DOCKER_IMAGE_2:1.0 $DOCKER_IMAGE_2:$DOCKER_TAG
             sleep 6
             '''
-            }
+                }
 
-            script {
-            sh '''
+                script {
+                    sh '''
             docker login -u $DOCKER_ID -p $DOCKER_PASS
             docker push $DOCKER_IMAGE_2:$DOCKER_TAG
             '''
+                }
             }
         }
-    }
-    stage('Docker Push image 3'){ // docker build image stage
-        steps {
-            script {
-            sh '''
+        stage('Docker Push image 3') { // docker build image stage
+            steps {
+                script {
+                    sh '''
                 echo $DOCKER_IMAGE_3:$DOCKER_TAG
                 docker pull $DOCKER_IMAGE_3:1.0
                 docker tag $DOCKER_IMAGE_3:1.0 $DOCKER_IMAGE_3:$DOCKER_TAG
             sleep 6
             '''
-            }
+                }
 
-            script {
-            sh '''
+                script {
+                    sh '''
             docker login -u $DOCKER_ID -p $DOCKER_PASS
             docker push $DOCKER_IMAGE_3:$DOCKER_TAG
             '''
+                }
             }
         }
-    }
-    stage('Docker Push image 4'){ // docker build image stage
-        steps {
-            script {
-            sh '''
+        stage('Docker Push image 4') { // docker build image stage
+            steps {
+                script {
+                    sh '''
                 echo $DOCKER_IMAGE_4:$DOCKER_TAG
                 docker pull $DOCKER_IMAGE_4:1.0
                 docker tag $DOCKER_IMAGE_4:1.0 $DOCKER_IMAGE_4:$DOCKER_TAG
             sleep 6
             '''
-            }
+                }
 
-            script {
-            sh '''
+                script {
+                    sh '''
             docker login -u $DOCKER_ID -p $DOCKER_PASS
             docker push $DOCKER_IMAGE_4:$DOCKER_TAG
             '''
+                }
             }
         }
-    }
-    stage('Deploiement en DEV'){
-    environment
+        stage('Deploiement en DEV') {
+            environment
     {
-    KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
-    NAMESPACE = 'DEV'
+                KUBECONFIG = credentials('config') // we retrieve  kubeconfig from secret file called config saved on jenkins
+                NAMESPACE = 'DEV'
     }
-    steps {
-        script {
-        sh '''
+            steps {
+                script {
+                    sh '''
         rm -Rf .kube
         mkdir .kube
         ls
@@ -121,19 +123,18 @@ stages {
         helm upgrade --install cast-service cast_service --namespace $NAMESPACE
         helm upgrade --install nginx nginx --namespace $NAMESPACE
         '''
+                }
+            }
         }
-    }
-
-    }
-    stage('Deploiement en QA'){
-    environment
+        stage('Deploiement en QA') {
+            environment
     {
-    KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
-    NAMESPACE = 'QA'
+                KUBECONFIG = credentials('config') // we retrieve  kubeconfig from secret file called config saved on jenkins
+                NAMESPACE = 'QA'
     }
-    steps {
-        script {
-        sh '''
+            steps {
+                script {
+                    sh '''
         rm -Rf .kube
         mkdir .kube
         ls
@@ -154,19 +155,18 @@ stages {
         helm upgrade --install cast-service cast_service --namespace $NAMESPACE
         helm upgrade --install nginx nginx --namespace $NAMESPACE
         '''
+                }
+            }
         }
-    }
-
-    }
-  stage('Deploiement en STAGING'){
-        environment
+        stage('Deploiement en STAGING') {
+            environment
         {
-        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
-        NAMESPACE = 'STAGING'
+                KUBECONFIG = credentials('config') // we retrieve  kubeconfig from secret file called config saved on jenkins
+                NAMESPACE = 'STAGING'
         }
-        steps {
-            script {
-            sh '''
+            steps {
+                script {
+                    sh '''
             rm -Rf .kube
             mkdir .kube
             ls
@@ -187,25 +187,24 @@ stages {
             helm upgrade --install cast-service cast_service --namespace $NAMESPACE
             helm upgrade --install nginx nginx --namespace $NAMESPACE
             '''
+                }
             }
         }
-
-        }
-  stage('Deploiement en PROD'){
-        environment
+        stage('Deploiement en PROD') {
+            environment
         {
-        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
-        NAMESPACE = 'PROD'
+                KUBECONFIG = credentials('config') // we retrieve  kubeconfig from secret file called config saved on jenkins
+                NAMESPACE = 'PROD'
         }
-        steps {
-            // Create an Approval Button with a timeout of 15minutes.
-            // this require a manuel validation in order to deploy on production environment
-            timeout(time: 15, unit: "MINUTES") {
-                input message: 'Do you want to deploy in production ?', ok: 'Yes'
-            }
+            steps {
+                // Create an Approval Button with a timeout of 15minutes.
+                // this require a manuel validation in order to deploy on production environment
+                timeout(time: 15, unit: 'MINUTES') {
+                    input message: 'Do you want to deploy in production ?', ok: 'Yes'
+                }
 
-            script {
-            sh '''
+                script {
+                    sh '''
             rm -Rf .kube
             mkdir .kube
             ls
@@ -226,8 +225,8 @@ stages {
             helm upgrade --install cast-service cast_service --namespace $NAMESPACE
             helm upgrade --install nginx nginx --namespace $NAMESPACE
             '''
+                }
             }
         }
     }
-}
 }
