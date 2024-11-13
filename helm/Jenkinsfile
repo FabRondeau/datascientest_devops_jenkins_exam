@@ -1,7 +1,6 @@
 pipeline {
     environment {
         // Declaration of environment variables.
-        KUBECONFIG = credentials('config')
         MOVIE_DB_VALUES = 'helm/movie_db/values.yaml'
         MOVIE_SERVICE_VALUES = 'helm/movie_service/values.yaml'
         CAST_DB_VALUES = 'helm/cast_db/values.yaml'
@@ -100,6 +99,7 @@ pipeline {
             environment
             {
                 NAMESPACE = 'DEV'
+                KUBECONFIG = credentials('config')
             }
             steps {
                 script {
@@ -131,6 +131,7 @@ pipeline {
             environment
             {
                 NAMESPACE = 'PROD'
+                KUBECONFIG = credentials('config')
             }
             steps {
                 // Create an Approval Button with a timeout of 15minutes.
