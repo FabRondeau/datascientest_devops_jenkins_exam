@@ -21,18 +21,18 @@ pipeline {
             steps {
                 script {
                     sh '''
-                echo $DOCKER_IMAGE_1:$DOCKER_TAG
-                docker pull $DOCKER_IMAGE_1:1.0
-                docker tag $DOCKER_IMAGE_1:1.0 $DOCKER_IMAGE_1:$DOCKER_TAG
-            sleep 6
-            '''
+                    echo $DOCKER_IMAGE_1:$DOCKER_TAG
+                    docker pull $DOCKER_IMAGE_1:1.0
+                    docker tag $DOCKER_IMAGE_1:1.0 $DOCKER_IMAGE_1:$DOCKER_TAG
+                    sleep 6
+                    '''
                 }
 
                 script {
                     sh '''
-            docker login -u $DOCKER_ID -p $DOCKER_PASS
-            docker push $DOCKER_IMAGE_1:$DOCKER_TAG
-            '''
+                    docker login -u $DOCKER_ID -p $DOCKER_PASS
+                    docker push $DOCKER_IMAGE_1:$DOCKER_TAG
+                    '''
                 }
             }
         }
@@ -41,18 +41,18 @@ pipeline {
             steps {
                 script {
                     sh '''
-                echo $DOCKER_IMAGE_2:$DOCKER_TAG
-                docker pull $DOCKER_IMAGE_2:1.0
-                docker tag $DOCKER_IMAGE_2:1.0 $DOCKER_IMAGE_2:$DOCKER_TAG
-            sleep 6
-            '''
+                    echo $DOCKER_IMAGE_2:$DOCKER_TAG
+                    docker pull $DOCKER_IMAGE_2:1.0
+                    docker tag $DOCKER_IMAGE_2:1.0 $DOCKER_IMAGE_2:$DOCKER_TAG
+                    sleep 6
+                    '''
                 }
 
                 script {
                     sh '''
-            docker login -u $DOCKER_ID -p $DOCKER_PASS
-            docker push $DOCKER_IMAGE_2:$DOCKER_TAG
-            '''
+                    docker login -u $DOCKER_ID -p $DOCKER_PASS
+                    docker push $DOCKER_IMAGE_2:$DOCKER_TAG
+                    '''
                 }
             }
         }
@@ -60,18 +60,18 @@ pipeline {
             steps {
                 script {
                     sh '''
-                echo $DOCKER_IMAGE_3:$DOCKER_TAG
-                docker pull $DOCKER_IMAGE_3:1.0
-                docker tag $DOCKER_IMAGE_3:1.0 $DOCKER_IMAGE_3:$DOCKER_TAG
-            sleep 6
-            '''
+                    echo $DOCKER_IMAGE_3:$DOCKER_TAG
+                    docker pull $DOCKER_IMAGE_3:1.0
+                    docker tag $DOCKER_IMAGE_3:1.0 $DOCKER_IMAGE_3:$DOCKER_TAG
+                    sleep 6
+                    '''
                 }
 
                 script {
                     sh '''
-            docker login -u $DOCKER_ID -p $DOCKER_PASS
-            docker push $DOCKER_IMAGE_3:$DOCKER_TAG
-            '''
+                    docker login -u $DOCKER_ID -p $DOCKER_PASS
+                    docker push $DOCKER_IMAGE_3:$DOCKER_TAG
+                    '''
                 }
             }
         }
@@ -79,123 +79,126 @@ pipeline {
             steps {
                 script {
                     sh '''
-                echo $DOCKER_IMAGE_4:$DOCKER_TAG
-                docker pull $DOCKER_IMAGE_4:1.0
-                docker tag $DOCKER_IMAGE_4:1.0 $DOCKER_IMAGE_4:$DOCKER_TAG
-            sleep 6
-            '''
+                    echo $DOCKER_IMAGE_4:$DOCKER_TAG
+                    docker pull $DOCKER_IMAGE_4:1.0
+                    docker tag $DOCKER_IMAGE_4:1.0 $DOCKER_IMAGE_4:$DOCKER_TAG
+                    sleep 6
+                    '''
                 }
 
                 script {
                     sh '''
-            docker login -u $DOCKER_ID -p $DOCKER_PASS
-            docker push $DOCKER_IMAGE_4:$DOCKER_TAG
-            '''
+                    docker login -u $DOCKER_ID -p $DOCKER_PASS
+                    docker push $DOCKER_IMAGE_4:$DOCKER_TAG
+                    '''
                 }
             }
         }
         stage('Deploiement en DEV') {
             environment
-    {
+            {
                 KUBECONFIG = credentials('config') // we retrieve  kubeconfig from secret file called config saved on jenkins
                 NAMESPACE = 'DEV'
-    }
+            }
             steps {
                 script {
                     sh '''
-        rm -Rf .kube
-        mkdir .kube
-        ls
-        cat $KUBECONFIG > .kube/config
-        cat $MOVIE_DB_VALUES
-        cat $MOVIE_SERVICE_VALUES
-        cat $CAST_DB_VALUES
-        cat $CAST_SERVICE_VALUES
-        cat $NGINX_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
-        helm upgrade --install movie-db movie_db --namespace $NAMESPACE
-        helm upgrade --install movie-service movie_service --namespace $NAMESPACE
-        helm upgrade --install cast-db cast_db --namespace $NAMESPACE
-        helm upgrade --install cast-service cast_service --namespace $NAMESPACE
-        helm upgrade --install nginx nginx --namespace $NAMESPACE
-        '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cat $MOVIE_DB_VALUES
+                    cat $MOVIE_SERVICE_VALUES
+                    cat $CAST_DB_VALUES
+                    cat $CAST_SERVICE_VALUES
+                    cat $NGINX_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+                    helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+                    helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+                    helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+                    helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+                    helm upgrade --install nginx nginx --namespace $NAMESPACE
+                    '''
                 }
             }
         }
         stage('Deploiement en QA') {
             environment
-    {
-                KUBECONFIG = credentials('config') // we retrieve  kubeconfig from secret file called config saved on jenkins
+            {
+                // we retrieve  kubeconfig from secret file called config saved on jenkins
+                KUBECONFIG = credentials('config')
                 NAMESPACE = 'QA'
-    }
+            }
             steps {
                 script {
                     sh '''
-        rm -Rf .kube
-        mkdir .kube
-        ls
-        cat $KUBECONFIG > .kube/config
-        cat $MOVIE_DB_VALUES
-        cat $MOVIE_SERVICE_VALUES
-        cat $CAST_DB_VALUES
-        cat $CAST_SERVICE_VALUES
-        cat $NGINX_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
-        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
-        helm upgrade --install movie-db movie_db --namespace $NAMESPACE
-        helm upgrade --install movie-service movie_service --namespace $NAMESPACE
-        helm upgrade --install cast-db cast_db --namespace $NAMESPACE
-        helm upgrade --install cast-service cast_service --namespace $NAMESPACE
-        helm upgrade --install nginx nginx --namespace $NAMESPACE
-        '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cat $MOVIE_DB_VALUES
+                    cat $MOVIE_SERVICE_VALUES
+                    cat $CAST_DB_VALUES
+                    cat $CAST_SERVICE_VALUES
+                    cat $NGINX_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+                    helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+                    helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+                    helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+                    helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+                    helm upgrade --install nginx nginx --namespace $NAMESPACE
+                    '''
                 }
             }
         }
         stage('Deploiement en STAGING') {
             environment
-        {
-                KUBECONFIG = credentials('config') // we retrieve  kubeconfig from secret file called config saved on jenkins
+            {
+                // we retrieve  kubeconfig from secret file called config saved on jenkins
+                KUBECONFIG = credentials('config')
                 NAMESPACE = 'STAGING'
-        }
+            }
             steps {
                 script {
                     sh '''
-            rm -Rf .kube
-            mkdir .kube
-            ls
-            cat $KUBECONFIG > .kube/config
-            cat $MOVIE_DB_VALUES
-            cat $MOVIE_SERVICE_VALUES
-            cat $CAST_DB_VALUES
-            cat $CAST_SERVICE_VALUES
-            cat $NGINX_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
-            helm upgrade --install movie-db movie_db --namespace $NAMESPACE
-            helm upgrade --install movie-service movie_service --namespace $NAMESPACE
-            helm upgrade --install cast-db cast_db --namespace $NAMESPACE
-            helm upgrade --install cast-service cast_service --namespace $NAMESPACE
-            helm upgrade --install nginx nginx --namespace $NAMESPACE
-            '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cat $MOVIE_DB_VALUES
+                    cat $MOVIE_SERVICE_VALUES
+                    cat $CAST_DB_VALUES
+                    cat $CAST_SERVICE_VALUES
+                    cat $NGINX_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+                    helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+                    helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+                    helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+                    helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+                    helm upgrade --install nginx nginx --namespace $NAMESPACE
+                    '''
                 }
             }
         }
         stage('Deploiement en PROD') {
             environment
-        {
-                KUBECONFIG = credentials('config') // we retrieve  kubeconfig from secret file called config saved on jenkins
+            {
+                // we retrieve  kubeconfig from secret file called config saved on jenkins
+                KUBECONFIG = credentials('config')
                 NAMESPACE = 'PROD'
-        }
+            }
             steps {
                 // Create an Approval Button with a timeout of 15minutes.
                 // this require a manuel validation in order to deploy on production environment
@@ -205,26 +208,26 @@ pipeline {
 
                 script {
                     sh '''
-            rm -Rf .kube
-            mkdir .kube
-            ls
-            cat $KUBECONFIG > .kube/config
-            cat $MOVIE_DB_VALUES
-            cat $MOVIE_SERVICE_VALUES
-            cat $CAST_DB_VALUES
-            cat $CAST_SERVICE_VALUES
-            cat $NGINX_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
-            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
-            helm upgrade --install movie-db movie_db --namespace $NAMESPACE
-            helm upgrade --install movie-service movie_service --namespace $NAMESPACE
-            helm upgrade --install cast-db cast_db --namespace $NAMESPACE
-            helm upgrade --install cast-service cast_service --namespace $NAMESPACE
-            helm upgrade --install nginx nginx --namespace $NAMESPACE
-            '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cat $MOVIE_DB_VALUES
+                    cat $MOVIE_SERVICE_VALUES
+                    cat $CAST_DB_VALUES
+                    cat $CAST_SERVICE_VALUES
+                    cat $NGINX_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $MOVIE_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_DB_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $CAST_SERVICE_VALUES
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" $NGINX_VALUES
+                    helm upgrade --install movie-db movie_db --namespace $NAMESPACE
+                    helm upgrade --install movie-service movie_service --namespace $NAMESPACE
+                    helm upgrade --install cast-db cast_db --namespace $NAMESPACE
+                    helm upgrade --install cast-service cast_service --namespace $NAMESPACE
+                    helm upgrade --install nginx nginx --namespace $NAMESPACE
+                    '''
                 }
             }
         }
